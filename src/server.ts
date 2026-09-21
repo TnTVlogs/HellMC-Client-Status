@@ -53,7 +53,13 @@ app.get('/healthz', (_req, res) => {
 })
 
 app.get('/api/config', publicLimiter, (_req, res) => {
-  res.json({ title: env.SITE_TITLE, subtitle: env.SITE_SUBTITLE })
+  res.json({
+    title: env.SITE_TITLE,
+    subtitle: env.SITE_SUBTITLE,
+    controllerName: env.PRIVACY_CONTROLLER_NAME ?? null,
+    contactEmail: env.PRIVACY_CONTACT_EMAIL ?? null,
+    controllerAddress: env.PRIVACY_CONTROLLER_ADDRESS ?? null,
+  })
 })
 
 app.get('/api/status', publicLimiter, (_req, res) => {

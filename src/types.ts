@@ -64,11 +64,24 @@ export type Bucket = { n: number; up: number; deg: number; lat: number }
 export type IncidentStatus = 'investigating' | 'identified' | 'monitoring' | 'resolved'
 export type IncidentImpact = 'none' | 'minor' | 'major' | 'critical'
 
-export type IncidentUpdate = { id: string; status: IncidentStatus; body: string; at: string; by: string | null }
+/** Text traduïble d'una incidència automàtica: clau + paràmetres (la UI el mostra en l'idioma de qui mira). `title`/`body` en són el text de reserva. */
+export type Translatable = { key: string; params: Record<string, string | number> }
+
+export type IncidentUpdate = {
+  id: string
+  status: IncidentStatus
+  body: string
+  bodyKey?: string
+  params?: Record<string, string | number>
+  at: string
+  by: string | null
+}
 
 export type Incident = {
   id: string
   title: string
+  titleKey?: string
+  params?: Record<string, string | number>
   impact: IncidentImpact
   status: IncidentStatus
   componentIds: string[]

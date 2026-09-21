@@ -10,42 +10,50 @@
   </head>
   <body>
     <header class="site-header">
-      <div class="wrap">
-        <h1 id="title">Estat</h1>
-        <p id="subtitle" class="muted"></p>
+      <div class="wrap header-row">
+        <div>
+          <h1 id="title">Estat</h1>
+          <p id="subtitle" class="muted"></p>
+        </div>
+        <div id="lang-select" class="lang-select"></div>
       </div>
     </header>
 
     <main class="wrap">
-      <div id="overall" class="overall loading" role="status">Carregant l'estat…</div>
+      <div id="overall" class="overall loading" role="status" data-i18n="page.loading">Carregant l'estat…</div>
 
       <section id="active-section" hidden>
-        <h2>Incidències actives</h2>
+        <h2 data-i18n="page.active">Incidències actives</h2>
         <div id="active"></div>
       </section>
 
       <section>
-        <h2>Serveis</h2>
+        <h2 data-i18n="page.services">Serveis</h2>
         <div id="components"></div>
         <p class="legend muted">
-          Disponibilitat dels darrers 90 dies (dies en UTC).
-          <span class="key up"></span>≥ 99,5 %
-          <span class="key warn"></span>≥ 95 %
-          <span class="key down"></span>&lt; 95 %
-          <span class="key none"></span>sense dades
+          <span data-i18n="page.legend">Disponibilitat dels darrers 90 dies (dies en UTC).</span>
+          <span class="key up"></span><span data-i18n="page.legendUp">≥ 99,5 %</span>
+          <span class="key warn"></span><span data-i18n="page.legendWarn">≥ 95 %</span>
+          <span class="key down"></span><span data-i18n="page.legendDown">&lt; 95 %</span>
+          <span class="key none"></span><span data-i18n="page.legendNone">sense dades</span>
         </p>
       </section>
 
       <section>
-        <h2>Historial d'incidències</h2>
+        <h2 data-i18n="page.history">Historial d'incidències</h2>
         <div id="history"></div>
       </section>
     </main>
 
-    <footer class="wrap muted small">
+    <footer class="wrap muted small footer-row">
       <span id="updated"></span>
+      <span class="footer-links">
+        <a href="privacy.html" data-i18n="footer.privacy">Privacitat</a>
+        <a href="#" data-open-consent data-i18n="footer.cookies">Galetes i preferències</a>
+      </span>
     </footer>
 
+    <script src="i18n.js" defer></script>
     <script src="app.js" defer></script>
   </body>
 </html>

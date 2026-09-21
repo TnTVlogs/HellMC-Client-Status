@@ -1,11 +1,10 @@
 // Pàgina d'estat pública. JavaScript pla, sense dependències ni build. Tot el text de l'API es pinta
-// amb textContent (mai innerHTML), així que cap dada pot injectar HTML.
+// amb textContent (mai innerHTML), així que cap dada pot injectar HTML. Els textos de la interfície
+// venen de i18n.js (català, castellà i anglès).
 
 const REFRESH_MS = 30000
-
-const STATUS_LABEL = { operational: 'Operatiu', degraded: 'Degradat', outage: 'No disponible' }
-const INCIDENT_STATUS = { investigating: 'Investigant', identified: 'Identificat', monitoring: 'Monitoratge', resolved: 'Resolt' }
-const IMPACT_LABEL = { none: 'Sense impacte', minor: 'Impacte menor', major: 'Impacte important', critical: 'Impacte crític' }
+const I = window.HellI18n
+const t = (key, params) => I.t(key, params)
 
 const $ = (id) => document.getElementById(id)
 
@@ -24,12 +23,9 @@ function h(tag, props, ...children) {
   return el
 }
 
-const fmtDateTime = (iso) =>
-  new Date(iso).toLocaleString('ca-ES', { dateStyle: 'medium', timeStyle: 'short' })
-
-const fmtDay = (iso) => new Date(iso).toLocaleDateString('ca-ES', { dateStyle: 'full' })
-
-const fmtUptime = (n) => (n === null ? '—' : `${n.toLocaleString('ca-ES', { maximumFractionDigits: 2 })} %`)
+const fmtDateTime = (iso) => new Date(iso).toLocaleString(I.locale, { dateStyle: 'medium', timeStyle: 'short' })
+const fmtDay = (iso) => new Date(iso).toLocaleDateString(I.locale, { dateStyle: 'full' })
+const fmtUptime = (n) => (n === null ? '—' : `${n.toLocaleString(I.locale, { maximumFractionDigits: 2 })} %`)
 
 function dayClass(uptime) {
   if (uptime === null) return 'none'
@@ -38,18 +34,32 @@ function dayClass(uptime) {
   return 'down'
 }
 
+/** Els grups per defecte estan escrits en català a la configuració; si són coneguts, es tradueixen. */
+const groupLabel = (name) => (I.t(`group.${name}`) === `group.${name}` ? name : t(`group.${name}`))
+
+const incidentTitle = (i) => (i.titleKey ? t(`auto.${i.titleKey}`, i.params) : i.title)
+const updateBody = (u) => (u.bodyKey ? t(`auto.${u.bodyKey}`, u.params) : u.body)
+
+function overallMessage(data) {
+  if (data.components.length === 0) return t('page.noComponents')
+  const status = data.overall.status
+  if (status === 'operational') return t('overall.operational')
+  if (status === 'degraded') return t('overall.degraded')
+  return data.components.every((c) => c.status === 'outage') ? t('overall.outage') : t('overall.partialOutage')
+}
+
 function renderComponent(c) {
   const extra = []
-  if (c.extra?.players !== undefined) extra.push(`${c.extra.players}/${c.extra.maxPlayers ?? '?'} jugadors`)
+  if (c.extra?.players !== undefined) extra.push(t('page.players', { online: c.extra.players, max: c.extra.maxPlayers ?? '?' }))
   if (c.extra?.version) extra.push(String(c.extra.version))
 
   const bars = h(
     'div',
-    { class: 'bars', role: 'img', 'aria-label': `Disponibilitat diària de ${c.name}` },
+    { class: 'bars', role: 'img', 'aria-label': c.name },
     c.days.map((d) =>
       h('div', {
         class: `day ${dayClass(d.uptime)}`,
-        title: `${d.date} · ${d.uptime === null ? 'sense dades' : fmtUptime(d.uptime)}`,
+        title: t('page.dayTitle', { date: d.date, value: d.uptime === null ? t('page.noData') : fmtUptime(d.uptime) }),
       }),
     ),
   )
@@ -61,18 +71,18 @@ function renderComponent(c) {
       'div',
       { class: 'component-head' },
       h('span', { class: 'component-name' }, c.name),
-      h('span', { class: `pill ${c.status}` }, STATUS_LABEL[c.status] ?? c.status),
+      h('span', { class: `pill ${c.status}` }, t(`status.${c.status}`)),
       h(
         'span',
         { class: 'component-meta' },
         extra.length ? h('span', {}, extra.join(' · ')) : null,
         c.latencyMs !== null ? h('span', {}, `${c.latencyMs} ms`) : null,
-        h('span', {}, `${fmtUptime(c.uptime)} en 90 dies`),
+        h('span', {}, t('page.uptime', { value: fmtUptime(c.uptime) })),
       ),
       c.description ? h('span', { class: 'component-desc' }, c.description) : null,
     ),
     bars,
-    h('div', { class: 'bars-legend' }, h('span', {}, `fa ${c.days.length} dies`), h('span', {}, 'avui')),
+    h('div', { class: 'bars-legend' }, h('span', {}, t('page.daysAgo', { n: c.days.length })), h('span', {}, t('page.today'))),
   )
 }
 
@@ -81,13 +91,8 @@ function renderIncident(i) {
   return h(
     'article',
     { class: `incident impact-${i.impact}${resolved ? ' resolved' : ''}` },
-    h('h4', {}, i.title),
-    h(
-      'p',
-      { class: 'incident-meta' },
-      `${INCIDENT_STATUS[i.status]} · ${IMPACT_LABEL[i.impact]} · ${fmtDateTime(i.createdAt)}`,
-      i.auto ? ' · detectat automàticament' : '',
-    ),
+    h('h4', {}, incidentTitle(i)),
+    h('p', { class: 'incident-meta' }, `${t(`inc.${i.status}`)} · ${t(`impact.${i.impact}`)} · ${fmtDateTime(i.createdAt)}`, i.auto ? ` · ${t('inc.auto')}` : ''),
     h(
       'ul',
       { class: 'timeline' },
@@ -95,32 +100,34 @@ function renderIncident(i) {
         h(
           'li',
           {},
-          h('span', { class: 'status' }, INCIDENT_STATUS[u.status] ?? u.status),
+          h('span', { class: 'status' }, t(`inc.${u.status}`)),
           ' — ',
           h('time', { datetime: u.at }, fmtDateTime(u.at)),
-          h('p', { class: 'body' }, u.body),
+          h('p', { class: 'body' }, updateBody(u)),
         ),
       ),
     ),
   )
 }
 
-function render(data) {
-  const overall = $('overall')
-  overall.className = `overall ${data.components.length === 0 ? 'loading' : data.overall.status}`
-  overall.textContent = data.components.length === 0 ? 'Encara no hi ha serveis monitoritzats' : data.overall.message
+let lastData = null
 
-  // Serveis agrupats
+function render(data) {
+  lastData = data
+  const overall = $('overall')
+  overall.removeAttribute('data-i18n')
+  overall.className = `overall ${data.components.length === 0 ? 'loading' : data.overall.status}`
+  overall.textContent = overallMessage(data)
+
   const groups = new Map()
   for (const c of data.components) {
     if (!groups.has(c.group)) groups.set(c.group, [])
     groups.get(c.group).push(c)
   }
   $('components').replaceChildren(
-    ...[...groups].map(([name, list]) => h('div', { class: 'group' }, h('h3', {}, name), list.map(renderComponent))),
+    ...[...groups].map(([name, list]) => h('div', { class: 'group' }, h('h3', {}, groupLabel(name)), list.map(renderComponent))),
   )
 
-  // Incidències actives i historial
   const active = data.incidents.filter((i) => i.status !== 'resolved')
   $('active-section').hidden = active.length === 0
   $('active').replaceChildren(...active.map(renderIncident))
@@ -134,11 +141,11 @@ function render(data) {
   }
   $('history').replaceChildren(
     ...(past.length === 0
-      ? [h('p', { class: 'empty' }, 'Cap incidència en els darrers 30 dies.')]
+      ? [h('p', { class: 'empty' }, t('page.noIncidents'))]
       : [...byDay].flatMap(([day, list]) => [h('div', { class: 'history-day' }, fmtDay(day)), ...list.map(renderIncident)])),
   )
 
-  $('updated').textContent = `Actualitzat ${fmtDateTime(data.generatedAt)}`
+  $('updated').textContent = t('page.updated', { time: fmtDateTime(data.generatedAt) })
 }
 
 async function load() {
@@ -150,7 +157,7 @@ async function load() {
     console.error(err)
     const overall = $('overall')
     overall.className = 'overall loading'
-    overall.textContent = "No es pot obtenir l'estat ara mateix. Es tornarà a provar automàticament."
+    overall.textContent = t('page.loadError')
   }
 }
 
@@ -163,6 +170,10 @@ async function init() {
   } catch {
     // Sense configuració: es queda el títol per defecte.
   }
+  // En canviar d'idioma es torna a pintar amb les dades que ja tenim (sense demanar-les de nou).
+  I.onChange(() => {
+    if (lastData) render(lastData)
+  })
   await load()
   setInterval(load, REFRESH_MS)
 }

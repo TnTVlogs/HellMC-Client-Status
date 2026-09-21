@@ -47,26 +47,41 @@ export function nextStatus(prev: ComponentStatus, s: Pick<ComponentState, 'failS
 
 function handleTransition(c: ComponentConfig, from: ComponentStatus, to: ComponentStatus, detail: string): void {
   const open = openAutoIncident(c.id)
+  const params = { name: c.name, detail }
 
   if (to === 'operational') {
     if (open) {
-      addUpdate(open.id, { status: 'resolved', by: null, body: `${c.name} torna a respondre amb normalitat. Resolt automàticament.` })
+      addUpdate(open.id, {
+        status: 'resolved',
+        by: null,
+        body: `${c.name} torna a respondre amb normalitat. Resolt automàticament.`,
+        bodyI18n: { key: 'recovered', params },
+      })
     }
     return
   }
 
-  const impact = to === 'outage' ? 'major' : 'minor'
-  const title = `${c.name}: ${to === 'outage' ? 'no disponible' : 'lent o degradat'}`
-  const body =
-    to === 'outage'
-      ? `El monitoratge automàtic ha detectat que ${c.name} no respon (${detail}).`
-      : `El monitoratge automàtic ha detectat que ${c.name} respon amb lentitud o de manera parcial (${detail}).`
+  const outage = to === 'outage'
+  const impact = outage ? 'major' : 'minor'
+  const title = `${c.name}: ${outage ? 'no disponible' : 'lent o degradat'}`
+  const titleI18n = { key: outage ? 'outageTitle' : 'degradedTitle', params }
+  const body = outage
+    ? `El monitoratge automàtic ha detectat que ${c.name} no respon (${detail}).`
+    : `El monitoratge automàtic ha detectat que ${c.name} respon amb lentitud o de manera parcial (${detail}).`
+  const bodyI18n = { key: outage ? 'outageBody' : 'degradedBody', params }
 
   if (!open) {
-    createIncident({ title, impact, status: 'investigating', componentIds: [c.id], body, by: null, auto: true })
+    createIncident({ title, impact, status: 'investigating', componentIds: [c.id], body, by: null, auto: true, titleI18n, bodyI18n })
   } else if (open.impact !== impact) {
-    patchIncident(open.id, { title, impact })
-    addUpdate(open.id, { status: 'investigating', by: null, body: from === 'degraded' ? `La situació ha empitjorat: ${detail}.` : `La situació ha millorat, però continua degradada: ${detail}.`, impact })
+    patchIncident(open.id, { title, impact, titleI18n })
+    const worse = from === 'degraded'
+    addUpdate(open.id, {
+      status: 'investigating',
+      by: null,
+      impact,
+      body: worse ? `La situació ha empitjorat: ${detail}.` : `La situació ha millorat, però continua degradada: ${detail}.`,
+      bodyI18n: { key: worse ? 'worse' : 'better', params },
+    })
   }
 }
 

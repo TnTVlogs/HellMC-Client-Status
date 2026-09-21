@@ -29,7 +29,7 @@ nano components.json     # els teus serveis; ajusta les URLs
 ```
 
 `API_TOKEN` és el secret compartit amb el panell: el **mateix valor** ha d'anar al `backend/.env` del panell com a
-`STATUS_API_TOKEN` (i la URL d'aquest servei com a `STATUS_URL`).
+`STATUS_TOKEN` (i la URL d'aquest servei com a `STATUS_URL`).
 
 ### Arrencar amb pm2
 
@@ -96,3 +96,17 @@ Administració (`Authorization: Bearer <API_TOKEN>`): `GET /api/admin/summary`, 
 
 - Copia la carpeta `data/` (o només `data/status.json`) per conservar l'historial.
 - Actualitzar: `git pull && npm ci && npm run build && pm2 restart hellmc-status`.
+
+## Idiomes, privacitat i galetes
+
+- **Idiomes:** català, castellà i anglès, amb selector a la capçalera. Es detecta el del navegador (`?lang=es` el força).
+  Les incidències automàtiques es mostren en l'idioma de qui les mira; el text de les que escriu una persona
+  es mostra tal com es va escriure.
+- **Galetes:** la pàgina **no en fa servir cap**. Només, si el visitant ho accepta al bàner, es recorda l'idioma a
+  l'emmagatzematge local del navegador (`hellmc.lang`); l'elecció mateixa es guarda a `hellmc.consent`. Si ho
+  rebutja, l'idioma només dura mentre la pestanya és oberta.
+- **Política de privacitat:** `/privacy.html` (3 idiomes). Cal indicar-hi qui n'és el responsable al `.env`:
+  `PRIVACY_CONTROLLER_NAME`, `PRIVACY_CONTACT_EMAIL` i, opcionalment, `PRIVACY_CONTROLLER_ADDRESS`. **El text és una
+  plantilla del que fa aquest programari; l'has de revisar abans de fer-la servir en producció.**
+- **Dades personals:** l'aplicació no desa res dels visitants. Apache i Cloudflare poden registrar la IP als seus
+  registres d'accés; decideix-ne la retenció i, si cal, ajusta el text.

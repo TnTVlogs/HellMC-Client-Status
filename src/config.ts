@@ -14,6 +14,10 @@ const envSchema = z.object({
   API_TOKEN: z.string().min(32, 'API_TOKEN ha de tenir almenys 32 caràcters (openssl rand -hex 32)'),
   /** Proxies de confiança davant el servei (Apache/Cloudflare = 1-2). */
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(0),
+  /** Responsable del tractament de dades (es mostra a la política de privacitat). */
+  PRIVACY_CONTROLLER_NAME: z.string().min(1).optional(),
+  PRIVACY_CONTACT_EMAIL: z.string().email().optional(),
+  PRIVACY_CONTROLLER_ADDRESS: z.string().min(1).optional(),
   SITE_TITLE: z.string().default('HellMC Estat'),
   SITE_SUBTITLE: z.string().default('Estat dels serveis de HellMC'),
   DEFAULT_INTERVAL_SECONDS: z.coerce.number().int().min(10).default(60),
