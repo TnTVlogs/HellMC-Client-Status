@@ -43,8 +43,11 @@ export const env = parsed.data
 
 const idSchema = z.string().regex(/^[a-z0-9][a-z0-9-]{0,62}$/, 'id: minúscules, números i guions')
 
+const perLang = z.object({ ca: z.string().max(200).optional(), es: z.string().max(200).optional(), en: z.string().max(200).optional() })
+
 const common = {
   id: idSchema,
+  i18n: z.object({ name: perLang.optional(), description: perLang.optional() }).optional(),
   name: z.string().min(1).max(80),
   description: z.string().max(200).optional(),
   group: z.string().max(60).optional(),

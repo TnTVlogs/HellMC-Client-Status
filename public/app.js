@@ -37,8 +37,14 @@ function dayClass(uptime) {
 /** Els grups per defecte estan escrits en català a la configuració; si són coneguts, es tradueixen. */
 const groupLabel = (name) => (I.t(`group.${name}`) === `group.${name}` ? name : t(`group.${name}`))
 
-const incidentTitle = (i) => (i.titleKey ? t(`auto.${i.titleKey}`, i.params) : i.title)
-const updateBody = (u) => (u.bodyKey ? t(`auto.${u.bodyKey}`, u.params) : u.body)
+/** Text d'un servei en l'idioma actiu (si la configuració en defineix), o el de reserva. */
+const localText = (c, field) => c.i18n?.[field]?.[I.lang] ?? c[field]
+
+/** Els paràmetres de les incidències automàtiques porten el nom del servei en cada idioma (name_ca, name_es…). */
+const localParams = (params) => (params ? { ...params, name: params[`name_${I.lang}`] ?? params.name } : params)
+
+const incidentTitle = (i) => (i.titleKey ? t(`auto.${i.titleKey}`, localParams(i.params)) : i.title)
+const updateBody = (u) => (u.bodyKey ? t(`auto.${u.bodyKey}`, localParams(u.params)) : u.body)
 
 function overallMessage(data) {
   if (data.components.length === 0) return t('page.noComponents')
@@ -55,7 +61,7 @@ function renderComponent(c) {
 
   const bars = h(
     'div',
-    { class: 'bars', role: 'img', 'aria-label': c.name },
+    { class: 'bars', role: 'img', 'aria-label': localText(c, 'name') },
     c.days.map((d) =>
       h('div', {
         class: `day ${dayClass(d.uptime)}`,
@@ -70,7 +76,7 @@ function renderComponent(c) {
     h(
       'div',
       { class: 'component-head' },
-      h('span', { class: 'component-name' }, c.name),
+      h('span', { class: 'component-name' }, localText(c, 'name')),
       h('span', { class: `pill ${c.status}` }, t(`status.${c.status}`)),
       h(
         'span',
@@ -79,7 +85,7 @@ function renderComponent(c) {
         c.latencyMs !== null ? h('span', {}, `${c.latencyMs} ms`) : null,
         h('span', {}, t('page.uptime', { value: fmtUptime(c.uptime) })),
       ),
-      c.description ? h('span', { class: 'component-desc' }, c.description) : null,
+      localText(c, 'description') ? h('span', { class: 'component-desc' }, localText(c, 'description')) : null,
     ),
     bars,
     h('div', { class: 'bars-legend' }, h('span', {}, t('page.daysAgo', { n: c.days.length })), h('span', {}, t('page.today'))),

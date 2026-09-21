@@ -9,10 +9,17 @@ export type Assertion = {
   minLength?: number
 }
 
+/** Noms i descripcions en cada idioma. Si falta un idioma, es fa servir `name` / `description`. */
+export type ComponentI18n = {
+  name?: Partial<Record<'ca' | 'es' | 'en', string>>
+  description?: Partial<Record<'ca' | 'es' | 'en', string>>
+}
+
 type Common = {
   id: string
   name: string
   description?: string
+  i18n?: ComponentI18n
   /** Agrupa components a la pàgina (p.ex. «Servei», «Servidors de joc»). */
   group?: string
   intervalSeconds?: number

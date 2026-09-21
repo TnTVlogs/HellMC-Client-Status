@@ -289,23 +289,129 @@
     renderBanner()
   }
 
-  // --- Selector d'idioma ------------------------------------------------------------------------
+  // --- Selector d'idioma (desplegable propi, accessible amb teclat) ------------------------------------
 
-  function renderSelector() {
+  let selectorOpen = false
+  let selectorActive = 0
+
+  function globeIcon() {
+    const ns = 'http://www.w3.org/2000/svg'
+    const svg = document.createElementNS(ns, 'svg')
+    for (const [k, v] of Object.entries({ viewBox: '0 0 24 24', width: '16', height: '16', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true', class: 'dropdown-icon' })) {
+      svg.setAttribute(k, v)
+    }
+    for (const d of ['M3 12h18', 'M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z']) {
+      const path = document.createElementNS(ns, 'path')
+      path.setAttribute('d', d)
+      svg.append(path)
+    }
+    const circle = document.createElementNS(ns, 'circle')
+    circle.setAttribute('cx', '12')
+    circle.setAttribute('cy', '12')
+    circle.setAttribute('r', '9')
+    svg.prepend(circle)
+    return svg
+  }
+
+  function renderSelector(refocus = false) {
     const host = document.getElementById('lang-select')
     if (!host) return
-    const select = document.createElement('select')
-    select.setAttribute('aria-label', t('lang.label'))
-    for (const l of LANGS) {
-      const opt = document.createElement('option')
-      opt.value = l.code
-      opt.textContent = l.label
-      opt.selected = l.code === lang
-      select.append(opt)
+
+    const trigger = document.createElement('button')
+    trigger.type = 'button'
+    trigger.className = selectorOpen ? 'dropdown-trigger open' : 'dropdown-trigger'
+    trigger.setAttribute('aria-haspopup', 'listbox')
+    trigger.setAttribute('aria-expanded', String(selectorOpen))
+    trigger.setAttribute('aria-label', t('lang.label'))
+    const chevron = document.createElement('span')
+    chevron.className = 'dropdown-chevron'
+    chevron.setAttribute('aria-hidden', 'true')
+    const label = document.createElement('span')
+    label.textContent = LANGS.find((l) => l.code === lang).label
+    trigger.append(globeIcon(), label, chevron)
+
+    const openList = () => {
+      selectorActive = Math.max(0, LANGS.findIndex((l) => l.code === lang))
+      selectorOpen = true
+      renderSelector(true)
     }
-    select.addEventListener('change', () => setLang(select.value))
-    host.replaceChildren(select)
+    const closeList = () => {
+      selectorOpen = false
+      renderSelector(true)
+    }
+    const pick = (index) => {
+      selectorOpen = false
+      const chosen = LANGS[index]
+      if (chosen && chosen.code !== lang) setLang(chosen.code)
+      else renderSelector(true)
+    }
+
+    trigger.addEventListener('click', () => (selectorOpen ? closeList() : openList()))
+    trigger.addEventListener('keydown', (e) => {
+      if (!selectorOpen) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault()
+          openList()
+        }
+        return
+      }
+      const move = (i) => {
+        selectorActive = Math.min(Math.max(i, 0), LANGS.length - 1)
+        renderSelector(true)
+      }
+      if (e.key === 'ArrowDown') (e.preventDefault(), move(selectorActive + 1))
+      else if (e.key === 'ArrowUp') (e.preventDefault(), move(selectorActive - 1))
+      else if (e.key === 'Home') (e.preventDefault(), move(0))
+      else if (e.key === 'End') (e.preventDefault(), move(LANGS.length - 1))
+      else if (e.key === 'Enter' || e.key === ' ') (e.preventDefault(), pick(selectorActive))
+      else if (e.key === 'Escape') (e.preventDefault(), closeList())
+      else if (e.key === 'Tab') (selectorOpen = false, renderSelector())
+    })
+
+    const nodes = [trigger]
+    if (selectorOpen) {
+      const list = document.createElement('ul')
+      list.className = 'dropdown-list'
+      list.setAttribute('role', 'listbox')
+      list.setAttribute('aria-label', t('lang.label'))
+      LANGS.forEach((l, i) => {
+        const li = document.createElement('li')
+        li.setAttribute('role', 'option')
+        li.setAttribute('aria-selected', String(l.code === lang))
+        li.className = [i === selectorActive ? 'active' : '', l.code === lang ? 'selected' : ''].join(' ').trim()
+        const name = document.createElement('span')
+        name.textContent = l.label
+        li.append(name)
+        if (l.code === lang) {
+          const tick = document.createElement('span')
+          tick.textContent = '✓'
+          tick.setAttribute('aria-hidden', 'true')
+          li.append(tick)
+        }
+        li.addEventListener('mousedown', (e) => {
+          e.preventDefault()
+          pick(i)
+        })
+        li.addEventListener('mouseenter', () => {
+          selectorActive = i
+          for (const [j, el] of [...list.children].entries()) el.classList.toggle('active', j === i)
+        })
+        list.append(li)
+      })
+      nodes.push(list)
+    }
+    host.replaceChildren(...nodes)
+    if (refocus) trigger.focus()
   }
+
+  // Un clic fora del desplegable el tanca.
+  document.addEventListener('mousedown', (e) => {
+    const host = document.getElementById('lang-select')
+    if (selectorOpen && host && !host.contains(e.target)) {
+      selectorOpen = false
+      renderSelector()
+    }
+  })
 
   // --- Bàner de galetes -----------------------------------------------------------------------------
 

@@ -47,7 +47,9 @@ export function nextStatus(prev: ComponentStatus, s: Pick<ComponentState, 'failS
 
 function handleTransition(c: ComponentConfig, from: ComponentStatus, to: ComponentStatus, detail: string): void {
   const open = openAutoIncident(c.id)
-  const params = { name: c.name, detail }
+  // El nom del servei es passa en cada idioma (name_ca, name_es…) perquè la UI el tradueixi.
+  const params: Record<string, string> = { name: c.name, detail }
+  for (const [lang, value] of Object.entries(c.i18n?.name ?? {})) if (value) params[`name_${lang}`] = value
 
   if (to === 'operational') {
     if (open) {

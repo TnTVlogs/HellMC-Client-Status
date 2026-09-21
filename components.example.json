@@ -6,7 +6,28 @@
     "group": "Serveis",
     "kind": "http",
     "url": "https://hellmcclient.sergidalmau.dev/api/health",
-    "assertions": [{ "path": "status", "equals": "ok" }, { "path": "db", "equals": "ok" }]
+    "assertions": [
+      {
+        "path": "status",
+        "equals": "ok"
+      },
+      {
+        "path": "db",
+        "equals": "ok"
+      }
+    ],
+    "i18n": {
+      "name": {
+        "ca": "Panell d'administració",
+        "es": "Panel de administración",
+        "en": "Admin panel"
+      },
+      "description": {
+        "ca": "Aplicació web i API per gestionar servidors i mods",
+        "es": "Aplicación web y API para gestionar servidores y mods",
+        "en": "Web app and API to manage servers and mods"
+      }
+    }
   },
   {
     "id": "distribution",
@@ -15,7 +36,25 @@
     "group": "Serveis",
     "kind": "http",
     "url": "https://hellmcclient.sergidalmau.dev/client/distribution.json",
-    "assertions": [{ "path": "servers", "type": "array", "minLength": 1 }]
+    "assertions": [
+      {
+        "path": "servers",
+        "type": "array",
+        "minLength": 1
+      }
+    ],
+    "i18n": {
+      "name": {
+        "ca": "Distribució del client",
+        "es": "Distribución del cliente",
+        "en": "Client distribution"
+      },
+      "description": {
+        "ca": "distribution.json que descarrega el launcher",
+        "es": "distribution.json que descarga el launcher",
+        "en": "distribution.json downloaded by the launcher"
+      }
+    }
   },
   {
     "id": "mojang",
@@ -24,7 +63,25 @@
     "group": "Dependències externes",
     "kind": "http",
     "url": "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json",
-    "assertions": [{ "path": "versions", "type": "array", "minLength": 1 }]
+    "assertions": [
+      {
+        "path": "versions",
+        "type": "array",
+        "minLength": 1
+      }
+    ],
+    "i18n": {
+      "name": {
+        "ca": "Servidors de Mojang",
+        "es": "Servidores de Mojang",
+        "en": "Mojang servers"
+      },
+      "description": {
+        "ca": "Manifest de versions de Minecraft",
+        "es": "Manifiesto de versiones de Minecraft",
+        "en": "Minecraft version manifest"
+      }
+    }
   },
   {
     "id": "modrinth",
@@ -33,6 +90,20 @@
     "group": "Dependències externes",
     "kind": "http",
     "url": "https://api.modrinth.com/",
-    "expectStatus": [200]
+    "expectStatus": [
+      200
+    ],
+    "i18n": {
+      "name": {
+        "ca": "Modrinth",
+        "es": "Modrinth",
+        "en": "Modrinth"
+      },
+      "description": {
+        "ca": "API de mods",
+        "es": "API de mods",
+        "en": "Mods API"
+      }
+    }
   }
 ]

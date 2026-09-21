@@ -68,7 +68,7 @@ Cada component és un objecte amb `id` (minúscules, números i guions), `name`,
 | `tcp` | `host`, `port` | Que el port accepti connexions |
 | `minecraft` | `host`, `port?` | *Server List Ping* (respecta el registre SRV si no hi ha port) |
 
-Camps comuns opcionals: `description`, `intervalSeconds` (mín. 10), `timeoutMs`, `slowMs` (latència a partir de la qual
+Camps comuns opcionals: `i18n` (noms i descripcions en `ca`/`es`/`en`, veure `components.example.json`; sense això es mostra `name` tal com és), `description`, `intervalSeconds` (mín. 10), `timeoutMs`, `slowMs` (latència a partir de la qual
 es considera «degradat»). Veure `components.example.json`.
 
 ## Estat i incidències automàtiques

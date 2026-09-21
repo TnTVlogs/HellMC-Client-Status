@@ -2,7 +2,7 @@ import { env } from './config.js'
 import { isOpen } from './incidents.js'
 import { allComponents, worse } from './monitor.js'
 import { hourKey, store } from './store.js'
-import type { ComponentConfig, ComponentStatus, Incident, IncidentImpact } from './types.js'
+import type { ComponentConfig, ComponentI18n, ComponentStatus, Incident, IncidentImpact } from './types.js'
 
 // Construeix el que mostra la pàgina d'estat (i el panell): estat actual de cada component, disponibilitat
 // diària dels darrers 90 dies i incidències. L'estat efectiu és el pitjor entre el detectat pel monitoratge
@@ -17,6 +17,8 @@ export type ComponentSummary = {
   id: string
   name: string
   description: string | null
+  /** Noms i descripcions traduïts (si la configuració en defineix). */
+  i18n: ComponentI18n | null
   group: string
   status: ComponentStatus
   /** Estat detectat pel monitoratge (sense comptar incidències manuals). */
@@ -96,6 +98,7 @@ export function buildSummary(options: { admin?: boolean; incidentDays?: number }
       id: c.id,
       name: c.name,
       description: c.description ?? null,
+      i18n: c.i18n ?? null,
       group: c.group ?? 'Serveis',
       status: worse(detected, fromIncidents),
       detectedStatus: detected,
