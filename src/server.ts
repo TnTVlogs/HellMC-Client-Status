@@ -183,7 +183,15 @@ app.use('/api/admin', admin)
 
 // --- Pàgina pública ------------------------------------------------------------------------------------
 
-app.use(express.static(fileURLToPath(new URL('../public', import.meta.url)), { maxAge: '5m', index: 'index.html' }))
+// `no-cache` = el navegador i Cloudflare sempre revaliden (ETag): després d'una actualització mai es barregen
+// fitxers nous amb antics, i si no han canviat la resposta és un 304 gairebé gratuït.
+app.use(
+  express.static(fileURLToPath(new URL('../public', import.meta.url)), {
+    index: 'index.html',
+    etag: true,
+    setHeaders: (res) => res.set('Cache-Control', 'no-cache'),
+  }),
+)
 
 app.use('/api', (_req, res) => fail(res, 404, 'NOT_FOUND', 'Ruta desconeguda.'))
 

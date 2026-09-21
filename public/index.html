@@ -45,12 +45,15 @@
       </section>
     </main>
 
-    <footer class="wrap muted small footer-row">
-      <span id="updated"></span>
-      <span class="footer-links">
-        <a href="privacy.html" data-i18n="footer.privacy">Privacitat</a>
-        <a href="#" data-open-consent data-i18n="footer.cookies">Galetes i preferències</a>
-      </span>
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <span id="updated" class="muted"></span>
+        <nav class="footer-links" data-i18n-aria="footer.legal" aria-label="Enllaços legals">
+          <a href="privacy.html" data-i18n="footer.privacy">Privacitat</a>
+          <span aria-hidden="true">·</span>
+          <a href="#" class="link-button" data-open-consent data-i18n="footer.cookies">Galetes i preferències</a>
+        </nav>
+      </div>
     </footer>
 
     <script src="i18n.js" defer></script>

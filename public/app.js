@@ -111,13 +111,25 @@ function renderIncident(i) {
 }
 
 let lastData = null
+/** Estat de la barra general: es guarda aquí perquè en canviar d'idioma es torni a pintar amb el text correcte. */
+let overallState = 'loading' // 'loading' | 'error' | 'ok'
+
+function renderOverall() {
+  const overall = $('overall')
+  overall.removeAttribute('data-i18n') // el text l'escriu sempre aquesta funció, no la traducció automàtica del DOM
+  if (overallState === 'ok' && lastData) {
+    overall.className = `overall ${lastData.components.length === 0 ? 'loading' : lastData.overall.status}`
+    overall.textContent = overallMessage(lastData)
+  } else {
+    overall.className = 'overall loading'
+    overall.textContent = overallState === 'error' ? t('page.loadError') : t('page.loading')
+  }
+}
 
 function render(data) {
   lastData = data
-  const overall = $('overall')
-  overall.removeAttribute('data-i18n')
-  overall.className = `overall ${data.components.length === 0 ? 'loading' : data.overall.status}`
-  overall.textContent = overallMessage(data)
+  overallState = 'ok'
+  renderOverall()
 
   const groups = new Map()
   for (const c of data.components) {
@@ -155,13 +167,21 @@ async function load() {
     render(await res.json())
   } catch (err) {
     console.error(err)
-    const overall = $('overall')
-    overall.className = 'overall loading'
-    overall.textContent = t('page.loadError')
+    // Si ja teníem dades, es continuen mostrant (poden ser velles uns segons); només s'avisa si no n'hi ha cap.
+    if (!lastData) {
+      overallState = 'error'
+      renderOverall()
+    }
   }
 }
 
 async function init() {
+  // Primer el que no depèn de la xarxa: així el canvi d'idioma sempre funciona, encara que /api/config trigui.
+  renderOverall()
+  I.onChange(() => {
+    if (lastData) render(lastData)
+    else renderOverall()
+  })
   try {
     const cfg = await (await fetch('api/config')).json()
     document.title = cfg.title
@@ -170,10 +190,6 @@ async function init() {
   } catch {
     // Sense configuració: es queda el títol per defecte.
   }
-  // En canviar d'idioma es torna a pintar amb les dades que ja tenim (sense demanar-les de nou).
-  I.onChange(() => {
-    if (lastData) render(lastData)
-  })
   await load()
   setInterval(load, REFRESH_MS)
 }

@@ -11,18 +11,22 @@
   <body>
     <header class="site-header">
       <div class="wrap header-row">
-        <a href="./" data-i18n="privacy.back">Enrere</a>
+        <a href="./" class="button back-button"><span aria-hidden="true">←</span> <span data-i18n="privacy.back">Enrere</span></a>
         <div id="lang-select" class="lang-select"></div>
       </div>
     </header>
 
     <main class="wrap legal" id="legal"></main>
 
-    <footer class="wrap muted small footer-row">
-      <span></span>
-      <span class="footer-links">
-        <a href="#" data-open-consent data-i18n="privacy.settings">Canvia les meves preferències de galetes</a>
-      </span>
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <span></span>
+        <nav class="footer-links" data-i18n-aria="footer.legal" aria-label="Enllaços legals">
+          <a href="./" data-i18n="privacy.back">Enrere</a>
+          <span aria-hidden="true">·</span>
+          <a href="#" class="link-button" data-open-consent data-i18n="footer.cookies">Galetes i preferències</a>
+        </nav>
+      </div>
     </footer>
 
     <script src="i18n.js" defer></script>

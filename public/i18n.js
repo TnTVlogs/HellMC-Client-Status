@@ -70,6 +70,8 @@
       'consent.accept': 'Accepta',
       'consent.reject': 'Rebutja',
       'consent.more': 'Més informació',
+      'consent.close': 'Tanca',
+      'footer.legal': 'Enllaços legals',
       'consent.current': 'Elecció actual: {value}',
       'consent.accepted': 'preferències acceptades',
       'consent.rejected': 'preferències rebutjades',
@@ -132,6 +134,8 @@
       'consent.accept': 'Aceptar',
       'consent.reject': 'Rechazar',
       'consent.more': 'Más información',
+      'consent.close': 'Cerrar',
+      'footer.legal': 'Enlaces legales',
       'consent.current': 'Elección actual: {value}',
       'consent.accepted': 'preferencias aceptadas',
       'consent.rejected': 'preferencias rechazadas',
@@ -194,6 +198,8 @@
       'consent.accept': 'Accept',
       'consent.reject': 'Reject',
       'consent.more': 'More information',
+      'consent.close': 'Close',
+      'footer.legal': 'Legal links',
       'consent.current': 'Current choice: {value}',
       'consent.accepted': 'preferences accepted',
       'consent.rejected': 'preferences rejected',
@@ -307,16 +313,30 @@
 
   function renderBanner() {
     let banner = document.getElementById('cookie-banner')
+    let backdrop = document.getElementById('cookie-backdrop')
     if (!bannerOpen) {
       banner?.remove()
+      backdrop?.remove()
       return
     }
+    // Reobert des del peu de pàgina (canviar o retirar l'elecció): finestra centrada amb fons enfosquit i tancable.
+    const reopened = consent !== null
     if (!banner) {
       banner = document.createElement('aside')
       banner.id = 'cookie-banner'
-      banner.className = 'cookie-banner'
       banner.setAttribute('role', 'dialog')
       document.body.append(banner)
+    }
+    banner.className = reopened ? 'cookie-banner cookie-modal' : 'cookie-banner'
+    banner.setAttribute('aria-modal', String(reopened))
+    if (reopened && !backdrop) {
+      backdrop = document.createElement('div')
+      backdrop.id = 'cookie-backdrop'
+      backdrop.className = 'cookie-backdrop'
+      backdrop.addEventListener('click', closeConsent)
+      document.body.append(backdrop)
+    } else if (!reopened) {
+      backdrop?.remove()
     }
     const h = (tag, props, ...kids) => {
       const el = document.createElement(tag)
@@ -329,19 +349,31 @@
     const accept = h('button', { type: 'button', className: 'primary', textContent: t('consent.accept') })
     accept.addEventListener('click', () => choose(true))
     const more = h('a', { href: 'privacy.html', textContent: t('consent.more') })
+    const close = reopened ? h('button', { type: 'button', className: 'ghost', textContent: t('consent.close') }) : ''
+    if (reopened) close.addEventListener('click', closeConsent)
 
     banner.replaceChildren(
-      h('h2', {}, consent ? t('consent.settingsTitle') : t('consent.title')),
+      h('h2', {}, reopened ? t('consent.settingsTitle') : t('consent.title')),
       h('p', {}, t('consent.text')),
-      consent ? h('p', { className: 'muted small' }, t('consent.current', { value: consent.preferences ? t('consent.accepted') : t('consent.rejected') })) : '',
-      h('div', { className: 'cookie-actions' }, reject, accept, more),
+      reopened ? h('p', { className: 'muted small' }, t('consent.current', { value: consent.preferences ? t('consent.accepted') : t('consent.rejected') })) : '',
+      h('div', { className: 'cookie-actions' }, reject, accept, close, more),
     )
+  }
+
+  function closeConsent() {
+    if (!consent) return // sense elecció prèvia no es pot tancar: cal triar
+    bannerOpen = false
+    renderBanner()
   }
 
   function openConsent() {
     bannerOpen = true
     renderBanner()
   }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && bannerOpen) closeConsent()
+  })
 
   window.HellI18n = {
     LANGS,
