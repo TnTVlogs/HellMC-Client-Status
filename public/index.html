@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ca">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Estat</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <h1 id="title">Estat</h1>
+        <p id="subtitle" class="muted"></p>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <div id="overall" class="overall loading" role="status">Carregant l'estat…</div>
+
+      <section id="active-section" hidden>
+        <h2>Incidències actives</h2>
+        <div id="active"></div>
+      </section>
+
+      <section>
+        <h2>Serveis</h2>
+        <div id="components"></div>
+        <p class="legend muted">
+          Disponibilitat dels darrers 90 dies (dies en UTC).
+          <span class="key up"></span>≥ 99,5 %
+          <span class="key warn"></span>≥ 95 %
+          <span class="key down"></span>&lt; 95 %
+          <span class="key none"></span>sense dades
+        </p>
+      </section>
+
+      <section>
+        <h2>Historial d'incidències</h2>
+        <div id="history"></div>
+      </section>
+    </main>
+
+    <footer class="wrap muted small">
+      <span id="updated"></span>
+    </footer>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "panel",
+    "name": "Panell d'administració",
+    "description": "Aplicació web i API per gestionar servidors i mods",
+    "group": "Serveis",
+    "kind": "http",
+    "url": "https://hellmcclient.sergidalmau.dev/api/health",
+    "assertions": [{ "path": "status", "equals": "ok" }, { "path": "db", "equals": "ok" }]
+  },
+  {
+    "id": "distribution",
+    "name": "Distribució del client",
+    "description": "distribution.json que descarrega el launcher",
+    "group": "Serveis",
+    "kind": "http",
+    "url": "https://hellmcclient.sergidalmau.dev/client/distribution.json",
+    "assertions": [{ "path": "servers", "type": "array", "minLength": 1 }]
+  },
+  {
+    "id": "mojang",
+    "name": "Servidors de Mojang",
+    "description": "Manifest de versions de Minecraft",
+    "group": "Dependències externes",
+    "kind": "http",
+    "url": "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json",
+    "assertions": [{ "path": "versions", "type": "array", "minLength": 1 }]
+  },
+  {
+    "id": "modrinth",
+    "name": "Modrinth",
+    "description": "API de mods",
+    "group": "Dependències externes",
+    "kind": "http",
+    "url": "https://api.modrinth.com/",
+    "expectStatus": [200]
+  }
+]
